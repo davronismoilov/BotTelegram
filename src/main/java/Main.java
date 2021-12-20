@@ -1,3 +1,4 @@
+import bot.MyBot;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import country.Data;
@@ -14,8 +15,11 @@ public class Main {
         try {
             TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
             telegramBotsApi.registerBot(new bot.MyBot());
+
         }catch (TelegramApiException e){
            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

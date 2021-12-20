@@ -12,6 +12,7 @@ import lombok.ToString;
 public class ChatObject {
     String chatId;
     State state;
+    String username;
     int countryId;
     int cityId;
 

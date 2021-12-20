@@ -4,10 +4,14 @@ import bot.ChatObject;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.checkerframework.checker.units.qual.C;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import weather.Weather;
+import weather.WeatherService;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class ChatObjectService {
@@ -94,5 +98,7 @@ public class ChatObjectService {
         }
         return null;
     }
+
+
 
 }

@@ -24,19 +24,45 @@ import java.util.WeakHashMap;
 
 
 public class MyBot extends TelegramLongPollingBot implements TelegramBotUtils {
-     static  String chatId ;
+    static String chatId;
     static ChatObjectService chatObjectService = new ChatObjectService();
+
+    public MyBot() {
+//        ArrayList<ChatObject> userList = ChatObjectService.getList();
+//        if (userList != null)
+//            for (int i = 0; i < userList.size(); i = i + 5) {
+//
+//                int finalI = i;
+//                Thread thread = new Thread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        sendNotification(finalI);
+//                    }
+//                });
+//                thread.start();
+//            }
+        chatId = "314452076";
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setText("XCGVHJBKGCsdgvjfvdgsjgfuew");
+        sendMessage.setChatId(chatId);
+        try {
+            execute(sendMessage);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public void onUpdateReceived(Update update) {
         Message msg = update.hasMessage() ? update.getMessage() : update.getCallbackQuery().getMessage();
         this.chatId = msg.getChatId().toString();
+        System.out.println(chatId);
 
-        ChatObject  chatObject= ChatObjectService.getModel(chatId);
+        ChatObject chatObject = ChatObjectService.getModel(chatId);
         System.out.println(msg.getChat().getUserName());
         if (chatObject == null) {
 
-            chatObjectService.add(new ChatObject(chatId,null,0,0));
+            chatObjectService.add(new ChatObject(chatId, null, msg.getChat().getUserName(), 0, 0));
             chatObject = chatObjectService.getModel(chatId);
         } else {
             chatObject = chatObjectService.getModel(chatId);
@@ -48,92 +74,91 @@ public class MyBot extends TelegramLongPollingBot implements TelegramBotUtils {
             this.chatId = update.getMessage().getChatId().toString();
 
 
-            if(message_text.equals("/start")){
+            if (message_text.equals("/start")) {
                 try {
-                   SendMessage sendMessage = new SendMessage();
-                   sendMessage.setText("Kerakli bo'limni tanglang yoki Shunchaki shaharni kiriting : ");
-                   sendMessage.setChatId(chatId);
-                   sendMessage.setReplyMarkup(mainManu());
-                   execute(sendMessage);
-                }catch (Exception e){
+                    SendMessage sendMessage = new SendMessage();
+                    sendMessage.setText("Kerakli bo'limni tanglang yoki Shunchaki shaharni kiriting : ");
+                    sendMessage.setChatId(chatId);
+                    sendMessage.setReplyMarkup(mainManu());
+                    execute(sendMessage);
+                } catch (Exception e) {
 
                 }
 
-            }else  if (message_text.equals("MAMLAKATLAR")) {
+            } else if (message_text.equals("MAMLAKATLAR")) {
                 try {
-                    sendMessageCountry(true,0);
+
+
+                    sendMessageCountry(true, 0);
                     chatObject.setState(State.country);
                     ChatObjectService.update(chatObject);
                     System.out.println(chatObject.getState());
-                }catch (Exception e){
+                } catch (Exception e) {
 
                 }
-            }else if (isNumeric(message_text)  && chatObject.getState() == State.country ){
+            } else if (isNumeric(message_text) && chatObject.getState() == State.country) {
                 System.out.println("city");
                 try {
-                    sendMessageCountry(false,Integer.valueOf(message_text)-1);
+                    sendMessageCountry(false, Integer.valueOf(message_text) - 1);
                     chatObject.setState(State.city);
                     chatObject.setCountryId(Integer.valueOf(message_text));
                     ChatObjectService.update(chatObject);
-                }catch (Exception e){
+                } catch (Exception e) {
 
                 }
-            }else if(isNumeric(message_text) && chatObject.getState()==(State.city)){
+            } else if (isNumeric(message_text) && chatObject.getState() == (State.city)) {
                 System.out.println("obhavo");
                 chatObject.setState(State.country);
-                chatObject.setCityId( Integer.valueOf(message_text));
+                chatObject.setCityId(Integer.valueOf(message_text));
                 ChatObjectService.update(chatObject);
                 try {
-                    String cityName = CountryService.getCityName(chatObject.getCountryId(),chatObject.getCityId());
-                    if (cityName.indexOf(" Viloyati") != -1){
-                        cityName = cityName.replace(" Viloyati","");
+                    String cityName = CountryService.getCityName(chatObject.getCountryId(), chatObject.getCityId());
+                    if (cityName.indexOf(" Viloyati") != -1) {
+                        cityName = cityName.replace(" Viloyati", "");
                     }
                     Weather w = WeatherService.getWeather(cityName);
                     System.out.println(w);
                     SendMessage sendMessage = new SendMessage();
                     String res = "Sana : " + date() +
-                            "\n \nShahar  : " +w.getName() +"  ✅"+
-                            "\n \nNamlik : " + w.getMain().getHumidity()+"💦"+
-                            "\n \n Havo harorati : " + (w.getMain().getTemp()-273)+" C🌡" +
+                            "\n \nShahar  : " + w.getName() + "  ✅" +
+                            "\n \nNamlik : " + w.getMain().getHumidity() + "💦" +
+                            "\n \n Havo harorati : " + (int) (w.getMain().getTemp() - 273) + " C° 🌡" +
                             "";
                     sendMessage.setText(res);
                     sendMessage.setChatId(chatId);
                     execute(sendMessage);
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
 
-            }else {
+            } else {
                 SendMessage sendMessage = new SendMessage();
                 try {
                     Weather w = WeatherService.getWeather(message_text);
                     System.out.println(w);
                     String res = "Sana : " + date() +
-                            "\n \nShahar  : " +w.getName() +"  ✅"+
-                            "\n \nNamlik : " + w.getMain().getHumidity()+"💦"+
-                            "\n \n Havo harorati : " + (w.getMain().getTemp()-273)+"🌡" +
+                            "\n \nShahar  : " + w.getName() + "  ✅" +
+                            "\n \nNamlik : " + w.getMain().getHumidity() + "💦" +
+                            "\n \n Havo harorati : " + (int) (w.getMain().getTemp() - 273) + "  C° 🌡" +
                             "";
-                             sendMessage.setText(res);
-                }catch (Exception e){
+                    sendMessage.setText(res);
+                } catch (Exception e) {
                     sendMessage.setText("❌ Shahar kiritishda xatolik bo'ldi  ");
                 }
 
                 sendMessage.setChatId(chatId);
                 try {
                     execute(sendMessage);
-                }catch (TelegramApiException e){
+                } catch (TelegramApiException e) {
 
                 }
 
             }
 
 
-
-
         } else if (update.hasCallbackQuery()) {
         }
-        }
-
+    }
 
 
     @Override
@@ -148,13 +173,12 @@ public class MyBot extends TelegramLongPollingBot implements TelegramBotUtils {
         return TelegramBotUtils.BOT_TOKEN;
     }
 
-    void sendMessageCountry(Boolean isCountry, int index)throws  Exception{
+    void sendMessageCountry(Boolean isCountry, int index) throws Exception {
         SendMessage sendMessage = new SendMessage();
-        if (isCountry){
+        if (isCountry) {
             String res = CountryService.getCountiries();
             sendMessage.setText(res);
-        }
-        else {
+        } else {
             String res = CountryService.getCity(index);
             sendMessage.setText(res);
         }
@@ -162,7 +186,7 @@ public class MyBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
         try {
             execute(sendMessage);
-        }catch (TelegramApiException e){
+        } catch (TelegramApiException e) {
 
         }
 
@@ -181,12 +205,12 @@ public class MyBot extends TelegramLongPollingBot implements TelegramBotUtils {
         return true;
     }
 
-   private String date(){
-       LocalDateTime time = LocalDateTime.now();
-       DateTimeFormatter time1 = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+    private String date() {
+        LocalDateTime time = LocalDateTime.now();
+        DateTimeFormatter time1 = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
 
-       return time.format(time1);
-   }
+        return time.format(time1);
+    }
 
 
     static public ReplyKeyboardMarkup mainManu() {
@@ -202,4 +226,37 @@ public class MyBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
         return replyKeyboardMarkup;
     }
+
+
+    private void sendNotification(int index) {
+        ArrayList<ChatObject> userList = ChatObjectService.getList();
+        System.out.println(userList);
+
+        for (int i = index; i < index + 5; i++) {
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setChatId(userList.get(i).getChatId());
+            Weather w = null;
+            try {
+                w = WeatherService.getWeather("Toshkent");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            System.out.println(w);
+
+            String res = "Sana : " + date() +
+                    "\n \nShahar  : " + w.getName() + "  ✅" +
+                    "\n \nNamlik : " + w.getMain().getHumidity() + "💦" +
+                    "\n \n Havo harorati : " + (int) (w.getMain().getTemp() - 273) + " C° 🌡" +
+                    "";
+            sendMessage.setText(res);
+
+            try {
+                execute(sendMessage);
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
 }
